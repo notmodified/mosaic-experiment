@@ -12,11 +12,9 @@ export const avgColor = (data) => {
 }
 
 export const avgSquares = (width, height, data) => {
-  // make this webwork
-
   const aw = width - width%2
   const ah = height - height%2
-  const SF = 50
+  const SF = 100
   const w = aw/SF |0
   const h = aw/SF |0
 

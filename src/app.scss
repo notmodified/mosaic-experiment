@@ -1,6 +1,87 @@
+$black: #000;
+$highlight: green;
+$current: red;
 
 .contain {
 }
 
 .item {
 }
+
+body {
+}
+
+#app {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+img {
+  flex: 0 0 auto;
+  display: block;
+  cursor: pointer;
+}
+
+#left {
+  overflow-y: scroll;
+  background-color: white;
+
+  padding: 0.6rem 0.3rem 0.3rem 0.3rem;
+
+  button {
+    flex: 1 0 auto;
+    border-radius: 0;
+    font-size: 2rem;
+    padding: 0.3rem;
+    margin: 0.3rem;
+  }
+
+  #image-box {
+    display: flex;
+    flex-wrap: wrap;
+
+    > * {
+      margin: 0.3rem;
+    }
+    .used {
+      box-shadow: 0 0 0.5rem $highlight;
+    }
+    .current, .current:hover {
+      box-shadow: 0 0 0.5rem $current;
+    }
+    *:hover {
+      box-shadow: 0 0 0.5rem $black;
+    }
+
+  }
+}
+
+#main {
+  padding-bottom: 52.5%;
+  position: relative;
+  box-shadow: 0 2px 1rem $black;
+
+  #aspect-box {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: $black;
+  }
+
+  canvas {
+    height: 100%;
+  }
+}
+
