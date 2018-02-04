@@ -13,6 +13,55 @@ import Worker from "worker-loader!./worker.js"
 import Sorter from "worker-loader!./sorter.js"
 import Color from "worker-loader!./color.js"
 
+// rendering bits
+const classes = (used, current) =>
+  R.join(' ', [used ? 'used' : '', current ? 'current' : ''])
+
+const spread = (num) => R.clamp(0, 0.2, num/100)
+
+const images = {
+  view: ({attrs: {images}}) =>
+  R.map(({src, used, current}) =>
+    mi('div', {
+      'class': classes(used, current),
+      'data-used': used,
+      'style': used ? `box-shadow: 0 0 0.3rem ${spread(used)}rem rgba(0, 0, 0, 0.6)`:''
+    },
+      mi('img', {src})), images)
+}
+
+const renderBox = (root, state) => {
+  mi.render(root, mi(images, {images: R.project(['src', 'used', 'current'], state)}))
+}
+// end rendering bits
+// state bits
+let theState = [];
+const perPage = 400;
+const appendToState = (item) => {
+  theState = R.append(item, theState.slice(-perPage+1))
+}
+const setUsed = (src) => {
+  theState = R.map(
+    R.cond([
+      [R.eqProps('src', {src}), R.evolve({used: R.inc})],
+      [R.T, R.identity],
+    ]), theState)
+}
+const setCurrent = (src) => {
+  theState = R.map(
+    R.compose(
+      R.cond([
+        [R.eqProps('src', {src}), R.assoc('current', true)],
+        [R.T, R.identity],
+      ]),
+      R.assoc('used', 0),
+      R.dissoc('current')
+    ), theState)
+}
+const getState = () => theState
+const bySrc = (src) => R.find(R.pathEq(['src'], src), theState)
+// state bits
+
 document.addEventListener('DOMContentLoaded', () => {
 
   const w = new Worker();
@@ -22,12 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const beacon = document.getElementById('bacon');
   const inspector = document.getElementById('inspector');
   const imag = document.getElementById('img');
+  const imgBox = document.getElementById('image-box')
 
   const key = '51a9f6e2f76d707dfbed602811e9d911';
 
-  const perPage = 400;
-
-  const api = () => `https://api.flickr.com/services/rest?method=flickr.photos.search&format=json&nojsoncallback=1&api_key=51a9f6e2f76d707dfbed602811e9d911&safe_search=1&text=something&per_page=${perPage}&page=1`;
+  const api = (q = 'cat') => `https://api.flickr.com/services/rest?method=flickr.photos.search&format=json&nojsoncallback=1&api_key=51a9f6e2f76d707dfbed602811e9d911&safe_search=1&text=${q}&per_page=${perPage}&page=1`;
 
   const pImageUrl = (s, {farm, server, id, secret}) => `https://farm${farm}.staticflickr.com/${server}/${id}_${secret}_${s}.jpg`;
   const imageUrl = R.curry(pImageUrl)("s")
@@ -38,28 +86,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const mctx = beacon.getContext("2d");
 
-  let theState = [];
+  const q = document.querySelector('#query')
+  const qValue = () => q.value
 
   const more = M.startWith(
     1,
-    M.fromEvent("click", document.querySelector("button.more"))
+    M.merge(
+      M.fromEvent("click", document.querySelector("button.more")),
+      M.fromEvent("keydown", q).filter(({key}) => key === 'Enter')
+    )
   )
     .debounce(50)
+    .map(qValue)
     .map(api)
     .map(fetch)
     .awaitPromises()
     .map(r => r.json())
     .awaitPromises()
     .map(R.path(["photos", "photo"]))
-  //  .scan((acc, e) => acc.concat(e).slice(-perPage + 1), [])
     .flatMap(M.from)
     .map(i => R.assoc("thumb", imageUrl(i), i))
     .map(i => R.assoc("full", fullImageUrl(i), i))
 
     .map(i => new Promise(res => {
+      const notFound = require('./photo_unavailable.png');
       fetch(i.thumb)
         .then(r => r.blob())
         .then(r => res(R.assoc("thumbBlob", r, i)))
+        .catch(e => {
+          fetch(notFound)
+            .then(r => r.blob())
+            .then(r => res(R.assoc("full", notFound, R.assoc("thumbBlob", r, i))))
+        })
     }))
     .awaitPromises()
 
@@ -75,33 +133,20 @@ document.addEventListener('DOMContentLoaded', () => {
       c.postMessage({data: idata, full: i.full, src: i.src}, [idata.data.buffer])
     })
 
-  const freshImages = M.fromEvent('message', c).map(({data}) => {
-    theState = R.append(data, theState.slice(-perPage+1))
-    s.postMessage({db: R.project(['avgColor', 'src'], theState)})
-    // this would have to just send one, but that would
-    // mean the other end had to loose them, jusr slice
-    // would do i guess
-  })
 
+  const freshImages = M.fromEvent('message', c)
+    .map(R.compose(appendToState, R.prop('data')))
+    .tap(() =>
+      s.postMessage({db: R.project(['avgColor', 'src'], getState())})
+    )
 
-  // here we combine? with a scan acc from above
-  //
-  M.fromEvent('click', document.getElementById('image-box'))
+  const imageChoose = M.fromEvent('click', document.getElementById('image-box'))
     .filter(R.compose(R.test(/IMG/), R.path(['target', 'tagName'])))
-    .debounce(50)
     .map(R.path(['target', 'src']))
     .tap((src) => {
-      theState = R.map(
-        R.compose(
-          R.cond([
-            [R.eqProps('src', {src}), R.assoc('current', true)],
-            [R.T, R.identity],
-          ]),
-          R.dissoc('used'),
-          R.dissoc('current')
-        ), theState)
+      setCurrent(src)
     })
-    .map(e => R.find(R.pathEq(['src'], e), theState))
+    .map(bySrc)
     .map(i => new Promise((res, rej) => {
       fetch(i.full)
         .then(r => r.blob())
@@ -121,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
       mctx.drawImage(r.fullImg, 0, 0, r.fullImg.width, r.fullImg.height)
       return mctx.getImageData(0,0,r.fullImg.width,r.fullImg.height);
     })
-    .observe(e => w.postMessage({data:e},[e.data.buffer]))
+    .tap(e => w.postMessage({data:e},[e.data.buffer]))
 
   M.fromEvent("message", w)
     .flatMap(R.compose(M.from, R.prop('data')))
@@ -133,14 +178,10 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
   const placeImage = M.fromEvent("message", s)
-    .map(({data}) => {
+    .tap(({data}) => {
       const img = document.querySelector(`img[src="${data.src}"]`)
 
-      theState = R.map(
-        R.cond([
-          [R.eqProps('src', data), R.assoc('used', true)],
-          [R.T, R.identity],
-        ]), theState)
+      setUsed(data.src)
 
       if (img) {
         const args = R.prepend(img, R.props(['x', 'y', 'w', 'h'], data.coords))
@@ -148,22 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     })
 
-  const imgBox = document.getElementById('image-box')
-
-  const classes = (used, current) =>
-    R.join(' ', [used ? 'used' : '', current ? 'current' : ''])
-
-  const images = {
-    view: ({attrs: {images}}) =>
-      R.map(({src, used, current}) =>
-        mi('img', {src, 'class': classes(used, current)}), images)
-  }
-
-  const renderBox = () => {
-    mi.render(imgBox, mi(images, {images: R.project(['src', 'used', 'current'], theState)}))
-  }
-
-  M.merge(placeImage.debounce(50), freshImages.debounce(5))
-    .observe(renderBox);
+  M.merge(placeImage.debounce(2), freshImages.debounce(5), imageChoose)
+    .observe(() => renderBox(imgBox, getState()));
 
 });

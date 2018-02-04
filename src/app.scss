@@ -1,14 +1,16 @@
 $black: #000;
-$highlight: green;
-$current: red;
-
-.contain {
-}
-
-.item {
-}
+$white: #fff;
+$highlight: #aa3939;
+$current: #aa3939;
+$used: $black; //#699;
 
 body {
+  font-family: sans-serif;
+  font-size: 16px;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 #app {
@@ -21,63 +23,97 @@ body {
   flex-direction: column;
 }
 
-img {
-  flex: 0 0 auto;
-  display: block;
-  cursor: pointer;
-}
 
 #left {
   overflow-y: scroll;
   background-color: white;
 
-  padding: 0.6rem 0.3rem 0.3rem 0.3rem;
+  padding: 0.3rem 0.3rem 0.3rem 0.3rem;
 
-  button {
+  .controls {
+    display: flex;
+  }
+
+  button, input {
     flex: 1 0 auto;
     border-radius: 0;
     font-size: 2rem;
-    padding: 0.3rem;
-    margin: 0.3rem;
+    padding: 0.3rem 1rem;
+    margin: 0.9rem 0.4rem;
+    border: 1px solid $black;
+    background-color: $white;
+    color: $black;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
   }
+  input {
+    text-transform: none;
+    display: block;
+  }
+  button {
+    display: block;
+    flex: 0 0 auto;
+  }
+  input:focus {
+    outline: none;
+  }
+  button:hover, button:focus, input:focus ~ button {
+    color: $white;
+    background-color: $black;
+  }
+
 
   #image-box {
     display: flex;
     flex-wrap: wrap;
+    img {
+      display: block;
+      border: 2px solid $white;
+      width: 75px;
+      height: 75px;
+    }
 
     > * {
+      flex: 0 0 auto;
       margin: 0.3rem;
+      box-shadow: 0 0 0 0 $white;
+      transition: box-shadow 0.2s ease-in-out;
+      cursor: pointer;
+      position: relative;
     }
-    .used {
-      box-shadow: 0 0 0.5rem $highlight;
+    .used img {
+      border: 2px solid $white;
     }
-    .current, .current:hover {
-      box-shadow: 0 0 0.5rem $current;
+    .current img , .current:hover img {
+      border: 2px solid $current;
     }
-    *:hover {
-      box-shadow: 0 0 0.5rem $black;
+    > * img:focus,
+    > * img:hover {
+      border: 2px solid $highlight;
     }
 
   }
 }
 
 #main {
-  padding-bottom: 52.5%;
+  min-height: 60vh;
   position: relative;
-  box-shadow: 0 2px 1rem $black;
+  box-shadow: 0 0.2rem 1rem $black;
+  z-index: 1;
+  background: $black;
 
   #aspect-box {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
     overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
 
-    background: $black;
   }
 
   canvas {

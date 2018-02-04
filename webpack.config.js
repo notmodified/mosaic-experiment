@@ -19,6 +19,10 @@ const config = {
         test: /\.scss?$/,
         exclude: /node_modules/,
         loaders: ['style-loader', 'css-loader', 'sass-loader'],
+      },
+      {
+        test: /\.(png|jpg|gif)$/,
+        loader: 'file-loader',
       }
     ],
   },
