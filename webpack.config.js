@@ -23,6 +23,11 @@ const config = {
       {
         test: /\.(png|jpg|gif)$/,
         loader: 'file-loader',
+      },
+      {
+        test: /\.worker\.js$/,
+        exclude: /node_modules/,
+        loaders: ['worker-loader', 'babel-loader'],
       }
     ],
   },

@@ -1,3 +1,4 @@
+import "babel-polyfill";
 import { avgColor, avgSquares } from "./avgs.js";
 
 onmessage = ({ data }) => {

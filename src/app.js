@@ -6,9 +6,9 @@ const gcd = require("gcd");
 
 import { avgColor, avgSquares } from "./avgs.js";
 
-import Averager from "worker-loader!./averager.js";
-import Sorter from "worker-loader!./sorter.js";
-import Color from "worker-loader!./color.js";
+import Averager from "./averager.worker.js";
+import Sorter from "./sorter.worker.js";
+import Color from "./color.worker.js";
 
 import {
   renderApp,
