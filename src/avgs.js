@@ -1,20 +1,19 @@
-import { range, splitEvery, zipWith, add, compose, reduce, map, into, zip, xprod } from "ramda";
 const M = require("most");
 const R = require("ramda");
 
 export const avgColor = (data) => {
   const d = data.data || data
-  return compose(
-    map(x => x/(d.length/4)|0),
-    reduce(zipWith(add), [0, 0, 0, 0]),
-    splitEvery(4),
+  return R.compose(
+    R.map(x => x/(d.length/4)|0),
+    R.reduce(R.zipWith(R.add), [0, 0, 0, 0]),
+    R.splitEvery(4),
   )(d);
 }
 
 export const avgSquares = (width, height, data) => {
   const aw = width - width%2
   const ah = height - height%2
-  const SF = 100
+  const SF = 90
   const w = aw/SF |0
   const h = aw/SF |0
 
@@ -31,10 +30,10 @@ export const avgSquares = (width, height, data) => {
     return t
   }
 
-  return compose(
-    map(r => R.assoc('avg', avgColor(r.data), r)),
-    map(r => R.assoc('data', area(r.x, r.y, r.w, r.h), r)),
-    map(R.zipObj(['w', 'h', 'x', 'y'])),
-    map(R.concat([w, h]))
+  return R.compose(
+    R.map(r => R.assoc('avg', avgColor(r.data), r)),
+    R.map(r => R.assoc('data', area(r.x, r.y, r.w, r.h), r)),
+    R.map(R.zipObj(['w', 'h', 'x', 'y'])),
+    R.map(R.concat([w, h]))
   )(coords);
 };

@@ -32,14 +32,29 @@ body {
 
   .controls {
     display: flex;
+    flex-wrap: wrap;
+    position: relative;
+
+    .loading__message {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba($white, 0.98);
+      font-size: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   }
 
   button, input {
-    flex: 1 0 auto;
+    flex: 0 0 auto;
     border-radius: 0;
     font-size: 2rem;
     padding: 0.3rem 1rem;
-    margin: 0.9rem 0.4rem;
+    margin: 0.4rem;
     border: 1px solid $black;
     background-color: $white;
     color: $black;
@@ -58,7 +73,7 @@ body {
   input:focus {
     outline: none;
   }
-  button:hover, button:focus, input:focus ~ button {
+  button:hover, button:focus {
     color: $white;
     background-color: $black;
   }
