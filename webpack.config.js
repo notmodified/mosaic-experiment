@@ -4,9 +4,10 @@ const config = {
   output: {
     filename: 'app.js',
     path: __dirname + '/dist',
+    publicPath: '/mosaic-experiment/dist/',
   },
   devServer: {
-    contentBase: __dirname + '/dist',
+    contentBase: __dirname,
   },
   module: {
     loaders: [
@@ -27,7 +28,7 @@ const config = {
       {
         test: /\.worker\.js$/,
         exclude: /node_modules/,
-        loaders: ['worker-loader', 'babel-loader'],
+        loaders: [{loader: 'worker-loader', options: {}}, { loader: 'babel-loader' }],
       }
     ],
   },

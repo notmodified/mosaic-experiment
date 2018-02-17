@@ -17,6 +17,7 @@
     "flickr-sdk": "^3.5.0",
     "flickrapi": "^0.6.0",
     "gcd": "^0.0.1",
+    "http-server": "^0.11.1",
     "immutable": "^3.8.2",
     "mithril": "^1.1.6",
     "most": "^1.7.2",
