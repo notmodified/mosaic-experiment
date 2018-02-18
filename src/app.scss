@@ -112,7 +112,8 @@ body {
 }
 
 #main {
-  min-height: 60vh;
+  padding-bottom: 56.25%;
+  max-height: 60vh;
   position: relative;
   box-shadow: 0 0.2rem 1rem $black;
   z-index: 1;
