@@ -12,7 +12,7 @@ All these bits have led to the inevitable mess that arises when you try things o
 [The result](https://notmodified.github.io/mosaic-experiment/) seems to mostly function in chrome and even slowly on edge. I haven't dared fire it up on a mobile and I wouldn't fancy its chances in safari but you never know.
 
 ## to run locally
-It uses webpack dev server so a `yarn` then `yarn start` will have something running at [](http://localhost:8080/webpack-dev-server/index.html)
+It uses webpack dev server so a `yarn` then `yarn start` will have something running at http://localhost:8080/webpack-dev-server/index.html
 
 ## to build for production
 Once you have done a quick `yarn` you should be able to `yarn build`. Assets will all be in dist/.
